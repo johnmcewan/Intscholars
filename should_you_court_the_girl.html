@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Should You Court the Girl?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --cream:    #FDFBF5;
+    --parchment:#F5EFD8;
+    --tan:      #E8D9B0;
+    --rust:     #C17F5A;
+    --rust-dark:#8B4E2E;
+    --mauve:    #C4917A;
+    --mauve-dark:#9A6655;
+    --pink:     #E8B4A0;
+    --gold:     #C8952A;
+    --ink:      #2A1F14;
+    --ink-mid:  #5C4033;
+    --ink-dim:  #8B7355;
+    --end-orange: #D4722A;
+    --end-mauve:  #9A6655;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,150,100,0.08) 28px),
+      repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(180,150,100,0.04) 28px);
+    color: var(--ink);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 60px;
+  }
+
+  /* ── Header ── */
+  #header {
+    text-align: center;
+    padding: 40px 20px 0;
+    max-width: 680px;
+    width: 100%;
+  }
+
+  .ring { font-size: 2rem; margin-bottom: 8px; }
+
+  #header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+  }
+
+  #header .subtitle {
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1rem;
+    color: var(--ink-mid);
+    font-style: italic;
+    margin-bottom: 32px;
+  }
+
+  /* ── Main card ── */
+  #card {
+    background: var(--cream);
+    border: 2px solid var(--tan);
+    border-radius: 2px;
+    max-width: 640px;
+    width: 100%;
+    padding: 36px 40px;
+    box-shadow: 4px 4px 0 var(--tan), 8px 8px 0 rgba(180,150,100,0.2);
+    animation: arrive 0.4s ease;
+    position: relative;
+  }
+
+  @keyframes arrive {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Decorative corner flourishes */
+  #card::before, #card::after {
+    content: '❧';
+    position: absolute;
+    font-size: 1.1rem;
+    color: var(--tan);
+  }
+  #card::before { top: 10px; left: 14px; }
+  #card::after  { bottom: 10px; right: 14px; transform: rotate(180deg); }
+
+  /* ── Question text ── */
+  .question {
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1.2rem;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  /* ── Choices ── */
+  #choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .choice {
+    background: transparent;
+    border: 1.5px solid var(--mauve);
+    color: var(--rust-dark);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1.05rem;
+    padding: 12px 20px 12px 40px;
+    cursor: pointer;
+    border-radius: 1px;
+    text-align: left;
+    transition: all 0.18s ease;
+    position: relative;
+  }
+
+  .choice::before {
+    content: '→';
+    position: absolute;
+    left: 15px;
+    font-family: Georgia, serif;
+    color: var(--mauve);
+    transition: left 0.18s ease, color 0.18s ease;
+  }
+
+  .choice:hover {
+    background: var(--parchment);
+    border-color: var(--rust);
+    color: var(--rust-dark);
+  }
+
+  .choice:hover::before { left: 19px; color: var(--rust); }
+
+  /* ── Ending cards ── */
+  .ending-orange {
+    background: var(--end-orange);
+    padding: 28px 32px;
+    text-align: center;
+    border-radius: 2px;
+  }
+
+  .ending-mauve {
+    background: var(--end-mauve);
+    padding: 28px 32px;
+    text-align: center;
+    border-radius: 2px;
+  }
+
+  .ending-orange h2, .ending-mauve h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .restart-btn {
+    margin-top: 20px;
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.7);
+    color: white;
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 0.95rem;
+    padding: 8px 20px;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: background 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .restart-btn:hover { background: rgba(255,255,255,0.15); }
+
+  /* ── Progress ── */
+  #progress {
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    text-align: center;
+    margin-top: 20px;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Footer ── */
+  #footer {
+    margin-top: 32px;
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+    font-style: italic;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="ring">💍</div>
+  <h1>Should You<br>Court the Girl?</h1>
+  <p class="subtitle">Can't decide whether to go ahead with the relationship?<br>Here's a handy guide!</p>
+</div>
+
+<div id="card">
+  <div class="question" id="question-text"></div>
+  <div id="choices"></div>
+</div>
+
+<div id="progress"></div>
+<div id="footer">A flowchart guide to mediaeval romance</div>
+
+<script>
+// ── Passage definitions ───────────────────────────────────────────────────────
+// Each passage: { text, choices: [{label, target}], ending: null|'orange'|'mauve' }
+
+const passages = {
+
+  "start": {
+    text: "Are you a wealthy aristocrat?",
+    choices: [
+      { label: "Yes", target: "have-wife" },
+      { label: "No",  target: "fabulously-handsome" },
+    ]
+  },
+
+  "have-wife": {
+    text: "Do you have a wife?",
+    choices: [
+      { label: "Yes", target: "she-have-husband" },
+      { label: "No",  target: "she-have-husband" },
+    ]
+  },
+
+  "she-have-husband": {
+    text: "Does she have a husband?",
+    choices: [
+      { label: "Yes",                      target: "end-probably-not" },
+      { label: "Yes, but I REALLY like her", target: "anyone-courting" },
+      { label: "No",                        target: "anyone-courting" },
+    ]
+  },
+
+  "fabulously-handsome": {
+    text: "Are you fabulously handsome?",
+    choices: [
+      { label: "Yes", target: "jousting-tournaments" },
+      { label: "No",  target: "end-probably-not" },
+    ]
+  },
+
+  "jousting-tournaments": {
+    text: "How many jousting tournaments have you won recently?",
+    choices: [
+      { label: "A few jousting tournaments",       target: "anyone-courting" },
+      { label: "Still waiting for my big break in jousting", target: "end-toughen-up" },
+    ]
+  },
+
+  "anyone-courting": {
+    text: "Is anyone else trying to court her already?",
+    choices: [
+      { label: "Yes", target: "best-him-duel" },
+      { label: "No",  target: "great-duellist" },
+    ]
+  },
+
+  "best-him-duel": {
+    text: "Could you best him in a duel?",
+    choices: [
+      { label: "Yes",                      target: "great-duellist" },
+      { label: "No, he'd rearrange my face", target: "end-probably-not" },
+    ]
+  },
+
+  "great-duellist": {
+    text: "I am a great duellist.",
+    choices: [
+      { label: "Continue →", target: "open-feelings" },
+    ]
+  },
+
+  "open-feelings": {
+    text: "Is she open with her feelings and affection?",
+    choices: [
+      { label: "Yes", target: "end-how-improper" },
+      { label: "No",  target: "mysterious" },
+    ]
+  },
+
+  "end-how-improper": {
+    text: "How improper!",
+    choices: [
+      { label: "Continue →", target: "end-court-the-girl" },
+    ]
+  },
+
+  "mysterious": {
+    text: "She's very mysterious.",
+    choices: [
+      { label: "Continue →", target: "sure-not-coy" },
+    ]
+  },
+
+  "sure-not-coy": {
+    text: "You're sure she's not playing coy, womanly games?",
+    choices: [
+      { label: "Yes — I'm sure", target: "occasional-glance" },
+      { label: "No — I'm not sure", target: "think-so" },
+    ]
+  },
+
+  "think-so": {
+    text: "I think so?",
+    choices: [
+      { label: "Yes", target: "sure-not-coy" },
+      { label: "No",  target: "occasional-glance" },
+    ]
+  },
+
+  "occasional-glance": {
+    text: "And yet, do you occasionally sense that she has cast the briefest glance in your direction? A slight, yet palpable hint of interest in her eyes as they ever so subtly meet yours?",
+    choices: [
+      { label: "Yes — I believe so",   target: "are-you-sure" },
+      { label: "I think so?",          target: "think-so-2" },
+    ]
+  },
+
+  "think-so-2": {
+    text: "I think so?",
+    choices: [
+      { label: "Continue →", target: "occasional-glance" },
+    ]
+  },
+
+  "are-you-sure": {
+    text: "Are you sure? Try expressing your love to her with a song, poem or act of valour. Does she seem more agreeable now?",
+    choices: [
+      { label: "Yes — it worked!",       target: "give-up-everything" },
+      { label: "No — she's unmoved",     target: "wow-worked" },
+    ]
+  },
+
+  "wow-worked": {
+    text: "Wow, I can't believe that worked.",
+    choices: [
+      { label: "Continue →", target: "give-up-everything" },
+    ]
+  },
+
+  "give-up-everything": {
+    text: "Are you prepared to give up everything that you hold dear just to make her your lover? To die, even, just to show her you care?",
+    choices: [
+      { label: "Yes — absolutely",        target: "nothing-wouldnt-do" },
+      { label: "No — that's too far",     target: "end-bit-much" },
+    ]
+  },
+
+  "nothing-wouldnt-do": {
+    text: "There's nothing I wouldn't do for her.",
+    choices: [
+      { label: "Continue →", target: "love-taboo" },
+    ]
+  },
+
+  "love-taboo": {
+    text: "Is the love between you taboo because of differences in class or family feuds?",
+    choices: [
+      { label: "Yes", target: "star-crossed" },
+      { label: "No",  target: "even-better" },
+    ]
+  },
+
+  "star-crossed": {
+    text: "We are tragically star-crossed and this can only end in pain.",
+    choices: [
+      { label: "Continue →", target: "end-court-the-girl" },
+    ]
+  },
+
+  "even-better": {
+    text: "Even better!",
+    choices: [
+      { label: "Continue →", target: "end-court-the-girl" },
+    ]
+  },
+
+  // ── Endings ───────────────────────────────────────────────────────────────
+
+  "end-probably-not": {
+    text: "Probably better not to court the girl",
+    ending: "mauve",
+    choices: []
+  },
+
+  "end-toughen-up": {
+    text: "Toughen up, then court the girl",
+    ending: "orange",
+    choices: []
+  },
+
+  "end-court-the-girl": {
+    text: "Court the Girl!",
+    ending: "orange",
+    choices: []
+  },
+
+  "end-how-improper-end": {
+    text: "How improper!\n\nCourt the Girl!",
+    ending: "orange",
+    choices: []
+  },
+
+  "end-bit-much": {
+    text: "Actually, this is sounding like a bit much.",
+    ending: "mauve",
+    choices: []
+  },
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let current = "start";
+let steps   = 0;
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function goTo(id) {
+  const p = passages[id];
+  if (!p) return;
+  current = id;
+  steps++;
+
+  const qEl  = document.getElementById('question-text');
+  const cEl  = document.getElementById('choices');
+  const prEl = document.getElementById('progress');
+
+  // Animate card
+  const card = document.getElementById('card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'arrive 0.35s ease';
+
+  if (p.ending) {
+    // Clear inner structure, replace with ending block
+    card.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = p.ending === 'orange' ? 'ending-orange' : 'ending-mauve';
+    div.innerHTML = `<h2>${p.text.replace(/\n/g,'<br>')}</h2>`;
+    const btn = document.createElement('button');
+    btn.className = 'restart-btn';
+    btn.textContent = '← Begin again';
+    btn.addEventListener('click', () => {
+      card.innerHTML = `<div class="question" id="question-text"></div><div id="choices"></div>`;
+      steps = 0;
+      goTo('start');
+    });
+    div.appendChild(btn);
+    card.appendChild(div);
+    prEl.textContent = `${steps} decision${steps !== 1 ? 's' : ''} made`;
+  } else {
+    // Restore normal structure if coming from restart
+    if (!document.getElementById('question-text')) {
+      card.innerHTML = `<div class="question" id="question-text"></div><div id="choices"></div>`;
+    }
+
+    document.getElementById('question-text').textContent = p.text;
+
+    const choicesEl = document.getElementById('choices');
+    choicesEl.innerHTML = '';
+    p.choices.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.textContent = c.label;
+      btn.addEventListener('click', () => goTo(c.target));
+      choicesEl.appendChild(btn);
+    });
+
+    prEl.textContent = steps === 0 ? '' : `${steps} decision${steps !== 1 ? 's' : ''} made`;
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+steps = 0;
+goTo('start');
+</script>
+</body>
+</html>

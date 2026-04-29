@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Inside Twine — An Interactive Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg:       #f5f0e8;
+  --paper:    #fdfaf4;
+  --ink:      #1a1a2e;
+  --ink-dim:  #6b6080;
+  --accent:   #5c35a0;
+  --accent2:  #e05c2a;
+  --accent3:  #1a7a5e;
+  --highlight:#fff0b3;
+  --code-bg:  #1a1a2e;
+  --code-fg:  #a0f0c0;
+  --border:   #c8bfa8;
+  --tag-bg:   #5c35a0;
+  --tag-fg:   #ffffff;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.8;
+  min-height: 100vh;
+}
+
+/* Ruled-paper lines on background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(180,160,120,0.18) 28px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+/* ── Header ── */
+#site-header {
+  text-align: center;
+  padding: 48px 0 24px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+#site-header h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+#site-header h1 em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.tagline {
+  color: var(--ink-dim);
+  font-style: italic;
+  margin-top: 8px;
+  font-size: 1rem;
+}
+
+/* ── Progress bar ── */
+#progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+#progress-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  letter-spacing: 0.06em;
+}
+
+#progress-bar-outer {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#progress-bar-inner {
+  height: 100%;
+  background: linear-gradient(to right, var(--accent), var(--accent2));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+#progress-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* ── Chapter tag ── */
+.chapter-tag {
+  display: inline-block;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 14px;
+}
+
+/* ── Passage card ── */
+#passage-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 40px 48px;
+  box-shadow: 3px 3px 0 var(--border);
+  animation: slide-in 0.35s ease;
+  position: relative;
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#passage-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Body text ── */
+.prose p { margin-bottom: 1.1em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--ink); }
+.prose em { color: var(--ink-dim); }
+
+/* ── Code blocks ── */
+.code-block {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  padding: 16px 20px;
+  border-radius: 4px;
+  margin: 16px 0;
+  overflow-x: auto;
+  white-space: pre;
+  border-left: 3px solid var(--accent);
+}
+
+.code-comment { color: #6a8a70; }
+.code-keyword { color: #f0a040; }
+.code-string  { color: #80d0f0; }
+.code-value   { color: #e08080; }
+
+/* ── Callout boxes ── */
+.callout {
+  border-left: 4px solid var(--accent);
+  background: rgba(92,53,160,0.06);
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.95rem;
+}
+
+.callout.tip  { border-color: var(--accent3); background: rgba(26,122,94,0.06); }
+.callout.warn { border-color: var(--accent2); background: rgba(224,92,42,0.06); }
+
+.callout-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.callout.tip  .callout-label { color: var(--accent3); }
+.callout.warn .callout-label { color: var(--accent2); }
+
+/* ── Live demo area ── */
+.demo-box {
+  border: 2px dashed var(--border);
+  border-radius: 4px;
+  padding: 18px 22px;
+  margin: 16px 0;
+  background: rgba(245,240,232,0.6);
+}
+
+.demo-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-label::before {
+  content: '▶';
+  color: var(--accent2);
+  font-size: 0.6rem;
+}
+
+/* ── Inline interactive elements (demo) ── */
+.demo-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  font-style: italic;
+}
+
+.demo-link:hover { color: var(--accent2); }
+
+.demo-revealed {
+  color: var(--accent3);
+  font-style: italic;
+  animation: pop-in 0.3s ease;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.demo-counter-val {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 1.1em;
+}
+
+.demo-hp-bar-wrap {
+  height: 14px;
+  background: #ddd;
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 6px 0;
+  width: 200px;
+}
+
+.demo-hp-bar {
+  height: 100%;
+  background: linear-gradient(to right, #e05c2a, #c03010);
+  border-radius: 7px;
+  transition: width 0.4s ease;
+}
+
+.demo-inventory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.demo-inv-item {
+  background: var(--accent);
+  color: white;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  padding: 2px 9px;
+  border-radius: 2px;
+}
+
+.demo-btn {
+  background: var(--accent);
+  color: white;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin: 4px 4px 4px 0;
+  transition: background 0.2s;
+}
+
+.demo-btn:hover { background: var(--accent2); }
+.demo-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+/* ── Feature grid ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.feature-card {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+  background: var(--paper);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feature-card:hover {
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transform: translate(-1px,-1px);
+}
+
+.fc-icon { font-size: 1.4rem; margin-bottom: 4px; }
+.fc-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.fc-desc { font-size: 0.85rem; color: var(--ink-dim); line-height: 1.5; }
+
+/* ── Choices ── */
+#choices-area {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  background: transparent;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 0.97rem;
+  padding: 13px 20px 13px 40px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  position: relative;
+  line-height: 1.4;
+}
+
+.choice-btn::before {
+  content: '→';
+  position: absolute;
+  left: 16px;
+  font-family: 'Space Mono', monospace;
+  transition: left 0.2s;
+}
+
+.choice-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.choice-btn:hover::before { left: 20px; }
+
+/* ── Breadcrumb / visited ── */
+#breadcrumb {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--ink-dim);
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+
+#breadcrumb span { color: var(--accent2); }
+
+/* ── Footer ── */
+#site-footer {
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--ink-dim);
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  letter-spacing: 0.06em;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header id="site-header">
+    <div class="logo">An Interactive Guide</div>
+    <h1>Inside <em>Twine</em></h1>
+    <p class="tagline">Explore what Twine can do — by doing it.</p>
+  </header>
+
+  <div id="progress-wrap">
+    <span id="progress-label">PROGRESS</span>
+    <div id="progress-bar-outer"><div id="progress-bar-inner" style="width:0%"></div></div>
+    <span id="progress-count">0 / 0</span>
+  </div>
+
+  <div id="breadcrumb"></div>
+
+  <div id="passage-card">
+    <div class="chapter-tag" id="chapter-tag">Chapter 1</div>
+    <div id="passage-title">Loading…</div>
+    <div id="passage-body" class="prose"></div>
+  </div>
+
+  <div id="choices-area"></div>
+
+  <footer id="site-footer">Built by Claude · A Twine Capability Demo · Harlowe Style</footer>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+const gs = {
+  visited: new Set(),
+  demoHP: 20,
+  demoCounter: 0,
+  demoInventory: [],
+  demoRevealed: false,
+  chosenFeature: null,
+};
+
+// ── Passage Map ──────────────────────────────────────────────────────────────
+const passages = {
+
+  // ── 1. Welcome ──
+  "welcome": {
+    chapter: "Introduction",
+    title: "Welcome to Twine",
+    total: 12,
+    body: () => `
+      <p><strong>Twine</strong> is a free, open-source tool for creating interactive, nonlinear stories — and much more. You write in a visual editor, connecting passages together like a web, and Twine outputs a single HTML file anyone can open in a browser.</p>
+      <p>This guide will walk you through Twine's core capabilities. But rather than just <em>telling</em> you what Twine can do, we're going to <em>show</em> you — by using those same features right here, in this very document.</p>
+      <div class="callout tip">
+        <span class="callout-label">💡 Meta-Note</span>
+        This entire guide is itself a Twine-style project: branching passages, variables, interactive demos, and multiple paths. You're already experiencing Twine as you read.
+      </div>
+      <p>Choose how you'd like to begin:</p>
+    `,
+    choices: [
+      { text: "Start from the beginning — take me through everything.", target: "what_is_twine" },
+      { text: "I know the basics. Show me the advanced features.", target: "feature_menu" },
+    ]
+  },
+
+  // ── 2. What is Twine ──
+  "what_is_twine": {
+    chapter: "Chapter 1 · The Basics",
+    title: "What Is Twine, Really?",
+    body: () => `
+      <p>At its heart, Twine is a <strong>passage editor</strong>. Your story is broken into discrete chunks called <em>passages</em> — think of them as index cards pinned to a corkboard. Each passage contains text, and you connect them by creating links.</p>
+      <p>In Harlowe (Twine's default format), a link looks like this:</p>
+      <div class="code-block"><span class="code-comment">// A basic link to another passage:</span>
+[[Go into the forest]]
+
+<span class="code-comment">// A link with custom label:</span>
+[[Enter carefully->Go into the forest]]
+
+<span class="code-comment">// A link that changes a variable AND goes somewhere:</span>
+(set: $brave to true)[[Charge in recklessly->Go into the forest]]</div>
+      <p>The Twine editor gives you a visual map of all your passages and their connections — you can literally <em>see</em> your story's shape as a network of nodes.</p>
+      <div class="callout">
+        <span class="callout-label">📌 Key Concept</span>
+        A Twine project is just an HTML file. No server, no install needed to play. Share it by emailing the file or hosting it anywhere online.
+      </div>
+    `,
+    choices: [
+      { text: "Tell me about Harlowe — Twine's default format.", target: "harlowe_intro" },
+      { text: "Skip ahead to variables and game logic.", target: "variables" },
+    ]
+  },
+
+  // ── 3. Harlowe ──
+  "harlowe_intro": {
+    chapter: "Chapter 1 · The Basics",
+    title: "Harlowe: Twine's Default Voice",
+    body: () => `
+      <p>Harlowe is the story format this guide uses. It's designed to be <strong>readable</strong> — its syntax reads almost like English, making it accessible to writers with no coding background.</p>
+      <p>Here's what Harlowe syntax looks like in practice:</p>
+      <div class="code-block"><span class="code-comment">// Setting a variable</span>
+<span class="code-keyword">(set:</span> $playerName <span class="code-keyword">to</span> <span class="code-string">"Aria"</span><span class="code-keyword">)</span>
+
+<span class="code-comment">// Displaying a variable inline</span>
+Hello, (print: $playerName)!
+
+<span class="code-comment">// Conditional text</span>
+<span class="code-keyword">(if:</span> $brave <span class="code-keyword">is</span> true<span class="code-keyword">)</span>[You charge forward boldly.]
+<span class="code-keyword">(else:)</span>[You hesitate at the threshold.]
+
+<span class="code-comment">// A click-to-reveal span</span>
+<span class="code-keyword">(click:</span> <span class="code-string">"the old chest"</span><span class="code-keyword">)</span>[It's empty. Of course it is.]</div>
+      <p>Notice how <code style="background:#eee;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:0.85em">(if:)</code>, <code style="background:#eee;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:0.85em">(set:)</code>, and <code style="background:#eee;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:0.85em">(click:)</code> all follow the same parenthetical pattern — that's Harlowe's macro syntax. Once you learn the pattern, everything else follows naturally.</p>
+    `,
+    choices: [
+      { text: "Show me variables and tracking player choices.", target: "variables" },
+      { text: "What about styling and visuals?", target: "styling" },
+    ]
+  },
+
+  // ── 4. Variables ──
+  "variables": {
+    chapter: "Chapter 2 · Logic & Variables",
+    title: "Variables: Remembering What Happened",
+    body: () => `
+      <p>Variables are how Twine <em>remembers</em>. Without them, every passage is a blank slate. With them, your story can track health, inventory, relationship scores, story flags, and more — and respond accordingly.</p>
+      <div class="code-block"><span class="code-comment">// Types of variables in Harlowe</span>
+<span class="code-keyword">(set:</span> $hp <span class="code-keyword">to</span> <span class="code-value">20</span><span class="code-keyword">)</span>           <span class="code-comment">// number</span>
+<span class="code-keyword">(set:</span> $name <span class="code-keyword">to</span> <span class="code-string">"Aria"</span><span class="code-keyword">)</span>      <span class="code-comment">// string</span>
+<span class="code-keyword">(set:</span> $hasSword <span class="code-keyword">to</span> true<span class="code-keyword">)</span>    <span class="code-comment">// boolean</span>
+<span class="code-keyword">(set:</span> $items <span class="code-keyword">to</span> (a: <span class="code-string">"key"</span>, <span class="code-string">"map"</span>)<span class="code-keyword">)</span> <span class="code-comment">// array</span>
+
+<span class="code-comment">// Modify them later</span>
+<span class="code-keyword">(set:</span> $hp <span class="code-keyword">to</span> $hp - <span class="code-value">5</span><span class="code-keyword">)</span>
+<span class="code-keyword">(set:</span> $items <span class="code-keyword">to</span> $items + (a: <span class="code-string">"torch"</span>)<span class="code-keyword">)</span></div>
+
+      <div class="demo-box">
+        <div class="demo-label">Live Demo — Variable Tracking</div>
+        <p style="margin-bottom:10px">This counter is a variable. Watch it update:</p>
+        <p>Clicks: <span class="demo-counter-val" id="demo-counter">${gs.demoCounter}</span></p>
+        <button class="demo-btn" onclick="demoIncrement()">+ Click me</button>
+        <button class="demo-btn" onclick="demoReset()">Reset</button>
+        <p style="margin-top:10px;font-size:0.9em;color:var(--ink-dim)" id="demo-counter-msg">${gs.demoCounter >= 5 ? '🎉 You clicked 5+ times! In Twine, this could unlock a secret passage.' : 'Click 5 times to see something happen.'}</p>
+      </div>
+    `,
+    choices: [
+      { text: "Show me conditionals — if/else logic.", target: "conditionals" },
+      { text: "How do I build an inventory system?", target: "inventory" },
+    ]
+  },
+
+  // ── 5. Conditionals ──
+  "conditionals": {
+    chapter: "Chapter 2 · Logic & Variables",
+    title: "Conditionals: Branching on State",
+    body: () => `
+      <p>The real power of Twine comes when passages <em>react</em> to what the player has done. Harlowe's <code style="background:#eee;padding:1px 4px;border-radius:3px;font-family:monospace;font-size:0.85em">(if:)</code> macro makes this easy.</p>
+      <div class="code-block"><span class="code-comment">// Show different text based on a variable</span>
+<span class="code-keyword">(if:</span> $hasSword<span class="code-keyword">)</span>[
+  You draw your sword and step forward confidently.
+]<span class="code-keyword">(else:)</span>[
+  You wish you had a weapon right now.
+]
+
+<span class="code-comment">// Multiple conditions</span>
+<span class="code-keyword">(if:</span> $hp > <span class="code-value">15</span><span class="code-keyword">)</span>[You feel strong.]
+<span class="code-keyword">(else-if:</span> $hp > <span class="code-value">5</span><span class="code-keyword">)</span>[You're hurt but standing.]
+<span class="code-keyword">(else:)</span>[You're barely alive.]
+
+<span class="code-comment">// Conditional links — only appear when true</span>
+<span class="code-keyword">(if:</span> $hasKey<span class="code-keyword">)</span>[[[Unlock the door->Secret Room]]]</div>
+
+      <div class="demo-box">
+        <div class="demo-label">Live Demo — Conditional Text</div>
+        <p style="margin-bottom:8px">Your HP: <strong id="cond-hp-val">${gs.demoHP}</strong>/20</p>
+        <div class="demo-hp-bar-wrap"><div class="demo-hp-bar" id="cond-hp-bar" style="width:${gs.demoHP/20*100}%"></div></div>
+        <p style="margin: 10px 0; font-style:italic; color: var(--accent3)" id="cond-status-text">${getHPText()}</p>
+        <button class="demo-btn" onclick="demoHurt()">Take 5 damage</button>
+        <button class="demo-btn" onclick="demoHeal()">Heal 5 HP</button>
+      </div>
+    `,
+    choices: [
+      { text: "Tell me about inventory systems.", target: "inventory" },
+      { text: "What about styling and layout?", target: "styling" },
+    ]
+  },
+
+  // ── 6. Inventory ──
+  "inventory": {
+    chapter: "Chapter 2 · Logic & Variables",
+    title: "Inventory Systems",
+    body: () => `
+      <p>Twine's array variables (<em>arrays</em> in Harlowe are called <strong>datamaps</strong> and <strong>arrays/sequences</strong>) let you build fully functional inventory systems. Items can be added, removed, and checked — just like a real game.</p>
+      <div class="code-block"><span class="code-comment">// Initialize empty inventory</span>
+<span class="code-keyword">(set:</span> $inv <span class="code-keyword">to</span> (a:)<span class="code-keyword">)</span>
+
+<span class="code-comment">// Add an item</span>
+<span class="code-keyword">(set:</span> $inv <span class="code-keyword">to</span> $inv + (a: <span class="code-string">"torch"</span>)<span class="code-keyword">)</span>
+
+<span class="code-comment">// Check if player has item</span>
+<span class="code-keyword">(if:</span> <span class="code-string">"torch"</span> is in $inv<span class="code-keyword">)</span>[You light the way ahead.]
+
+<span class="code-comment">// Remove an item</span>
+<span class="code-keyword">(set:</span> $inv <span class="code-keyword">to</span> $inv's <span class="code-keyword">(where:</span> it is not <span class="code-string">"torch"</span><span class="code-keyword">)</span><span class="code-keyword">)</span>
+
+<span class="code-comment">// Display all items</span>
+<span class="code-keyword">(for:</span> each _item, ...$inv<span class="code-keyword">)</span>[ • (print: _item) ]</div>
+
+      <div class="demo-box">
+        <div class="demo-label">Live Demo — Inventory</div>
+        <p style="margin-bottom:8px">Pick up items and watch the inventory update:</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+          <button class="demo-btn" id="btn-torch" onclick="demoPickup('🔦 Torch','btn-torch')">Pick up Torch</button>
+          <button class="demo-btn" id="btn-key" onclick="demoPickup('🗝 Key','btn-key')">Pick up Key</button>
+          <button class="demo-btn" id="btn-potion" onclick="demoPickup('🧪 Potion','btn-potion')">Pick up Potion</button>
+          <button class="demo-btn" id="btn-map" onclick="demoPickup('🗺 Map','btn-map')">Pick up Map</button>
+        </div>
+        <p style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--ink-dim);margin-bottom:6px">INVENTORY:</p>
+        <div class="demo-inventory" id="demo-inv-display">
+          ${gs.demoInventory.length ? gs.demoInventory.map(i=>`<span class="demo-inv-item">${i}</span>`).join('') : '<em style="color:var(--ink-dim);font-size:0.9rem">Empty</em>'}
+        </div>
+      </div>
+    `,
+    choices: [
+      { text: "Now show me styling and CSS customization.", target: "styling" },
+      { text: "What about click-to-reveal and interactive text?", target: "interactive_text" },
+    ]
+  },
+
+  // ── 7. Interactive Text ──
+  "interactive_text": {
+    chapter: "Chapter 3 · Interactivity",
+    title: "Click-to-Reveal & Interactive Text",
+    body: () => `
+      <p>One of Harlowe's most distinctive features is <strong>interactive inline text</strong> — passages where words and phrases themselves become buttons, revealers, and changers. This lets you create an exploratory reading experience where the reader pokes at the text like a physical object.</p>
+      <div class="code-block"><span class="code-comment">// Click a word to reveal more text</span>
+You see <span class="code-keyword">(click:</span> <span class="code-string">"a strange door"</span><span class="code-keyword">)</span>[<span class="code-comment">[It's carved with runes.]</span>] a strange door.
+
+<span class="code-comment">// Replace text on click</span>
+<span class="code-keyword">(link-replace:</span> <span class="code-string">"I'm not sure..."</span><span class="code-keyword">)</span>[Actually, I know exactly what to do.]
+
+<span class="code-comment">// Append text after a link click</span>
+<span class="code-keyword">(link-append:</span> <span class="code-string">"Read the inscription"</span><span class="code-keyword">)</span>[
+  The runes read: "Only the bold may pass."
+]
+
+<span class="code-comment">// Cycling link (rotates through options)</span>
+The sky is <span class="code-keyword">(cycling-link:</span> <span class="code-string">"stormy"</span>, <span class="code-string">"clear"</span>, <span class="code-string">"blood-red"</span><span class="code-keyword">)</span>.</div>
+
+      <div class="demo-box">
+        <div class="demo-label">Live Demo — Click to Reveal</div>
+        <p>The old library was silent. Dust lay thick on every surface. ${!gs.demoRevealed ? `<span class="demo-link" onclick="demoReveal()">A book lay open on the desk.</span>` : `<span class="demo-revealed">A book lay open on the desk. Its pages showed a map — one you recognized. Your destination was marked in red ink, and someone had written in the margin: <em>"Don't go alone."</em></span>`}</p>
+      </div>
+    `,
+    choices: [
+      { text: "Tell me about styling and visual design.", target: "styling" },
+      { text: "What about multimedia — sounds and images?", target: "multimedia" },
+    ]
+  },
+
+  // ── 8. Styling ──
+  "styling": {
+    chapter: "Chapter 3 · Interactivity",
+    title: "Styling: Making It Look Like Yours",
+    body: () => `
+      <p>Twine stories are HTML files, which means <strong>CSS is fully available</strong>. You can make your story look like anything — a terminal, a handwritten letter, a corporate report, a retro game. The only limit is your CSS knowledge.</p>
+      <p>In Harlowe, you add custom CSS via the <em>Story Stylesheet</em> panel in the editor. You can also use Harlowe's built-in style macros for inline changes:</p>
+      <div class="code-block"><span class="code-comment">// Built-in text styling macros</span>
+<span class="code-keyword">(text-colour:</span> <span class="code-string">"red"</span><span class="code-keyword">)</span>[This text is red.]
+<span class="code-keyword">(text-size:</span> <span class="code-value">1.5</span><span class="code-keyword">)</span>[This text is 150% normal size.]
+<span class="code-keyword">(text-style:</span> <span class="code-string">"bold"</span><span class="code-keyword">)</span>[Bold text here.]
+<span class="code-keyword">(text-style:</span> <span class="code-string">"shudder"</span><span class="code-keyword">)</span>[This text shakes!]
+<span class="code-keyword">(text-style:</span> <span class="code-string">"rumble"</span><span class="code-keyword">)</span>[This text vibrates!]
+
+<span class="code-comment">// Custom CSS via the stylesheet</span>
+tw-passage {
+  font-family: 'Courier New', monospace;
+  background: black;
+  color: lime;
+}
+
+tw-link { color: cyan; }</div>
+
+      <div class="demo-box">
+        <div class="demo-label">Style Showcase</div>
+        <p>The same sentence, three different visual identities:</p>
+        <p style="font-family:'Space Mono',monospace;background:#1a1a2e;color:#a0f0c0;padding:8px 12px;border-radius:3px;margin:8px 0">You enter the dungeon. &gt; _</p>
+        <p style="font-family:'Libre Baskerville',serif;font-style:italic;color:#5c3010;border-left:3px solid #c8a060;padding-left:12px;margin:8px 0">You enter the dungeon. The stone is cold beneath your fingers.</p>
+        <p style="font-family:'Space Mono',monospace;font-size:0.8rem;color:#ff4444;background:#111;padding:8px 12px;border:1px solid #ff4444;border-radius:2px;margin:8px 0">⚠ ENTERING SECTOR 7 — CLEARANCE LEVEL INSUFFICIENT</p>
+      </div>
+    `,
+    choices: [
+      { text: "Tell me about multimedia — audio and images.", target: "multimedia" },
+      { text: "What can Twine be used for beyond stories?", target: "use_cases" },
+    ]
+  },
+
+  // ── 9. Multimedia ──
+  "multimedia": {
+    chapter: "Chapter 4 · Beyond Text",
+    title: "Multimedia: Images, Audio & More",
+    body: () => `
+      <p>Since Twine outputs HTML, it can embed <strong>anything a webpage can display</strong> — images, audio, video, even JavaScript widgets and canvas animations.</p>
+      <div class="code-block"><span class="code-comment">// Embed an image</span>
+<span class="code-keyword">(display:</span> <span class="code-string">"forest.png"</span><span class="code-keyword">)</span>
+
+<span class="code-comment">// Or use raw HTML in a passage:</span>
+&lt;img src="forest.png" alt="Dark forest" style="width:100%"&gt;
+
+<span class="code-comment">// Background music (Harlowe audio macro)</span>
+<span class="code-keyword">(cue:</span> <span class="code-string">"ambient"</span><span class="code-keyword">)</span>
+<span class="code-keyword">(audio:</span> <span class="code-string">"ambient"</span>, <span class="code-string">"loop"</span>, <span class="code-string">"play"</span><span class="code-keyword">)</span>
+
+<span class="code-comment">// Harlowe's (transition:) macro</span>
+<span class="code-keyword">(transition:</span> <span class="code-string">"dissolve"</span><span class="code-keyword">)</span>[
+  [[Step through the portal->Next Room]]
+]
+
+<span class="code-comment">// Animated text effect</span>
+<span class="code-keyword">(transition-time:</span> <span class="code-value">2s</span><span class="code-keyword">)</span><span class="code-keyword">(transition:</span><span class="code-string">"slide-right"</span><span class="code-keyword">)</span>[Whoosh!]</div>
+
+      <div class="callout tip">
+        <span class="callout-label">💡 Pro Tip</span>
+        For games, the SugarCube format has more robust audio/media support. For pure narrative with some flair, Harlowe's built-in transitions are lovely.
+      </div>
+      <div class="callout warn">
+        <span class="callout-label">⚠ File Size</span>
+        If you embed images/audio directly in the HTML file (as base64), the file size grows quickly. For larger projects, link to external files or host assets separately.
+      </div>
+    `,
+    choices: [
+      { text: "What can Twine actually be used for — beyond fiction?", target: "use_cases" },
+      { text: "Show me the feature overview menu.", target: "feature_menu" },
+    ]
+  },
+
+  // ── 10. Feature Menu ──
+  "feature_menu": {
+    chapter: "Chapter 5 · Overview",
+    title: "Twine at a Glance",
+    body: () => `
+      <p>Here's a summary of everything Twine can do. Click any card to jump to that topic:</p>
+      <div class="feature-grid">
+        <div class="feature-card" onclick="goTo('variables')">
+          <div class="fc-icon">📊</div>
+          <div class="fc-title">Variables & State</div>
+          <div class="fc-desc">Numbers, strings, booleans, and arrays that persist across passages.</div>
+        </div>
+        <div class="feature-card" onclick="goTo('conditionals')">
+          <div class="fc-icon">🔀</div>
+          <div class="fc-title">Conditionals</div>
+          <div class="fc-desc">if/else logic that shapes what readers see based on past choices.</div>
+        </div>
+        <div class="feature-card" onclick="goTo('inventory')">
+          <div class="fc-icon">🎒</div>
+          <div class="fc-title">Inventory Systems</div>
+          <div class="fc-desc">Array-based item tracking for full game-like experiences.</div>
+        </div>
+        <div class="feature-card" onclick="goTo('interactive_text')">
+          <div class="fc-icon">✨</div>
+          <div class="fc-title">Interactive Text</div>
+          <div class="fc-desc">Click-to-reveal, link-replace, cycling links, and more.</div>
+        </div>
+        <div class="feature-card" onclick="goTo('styling')">
+          <div class="fc-icon">🎨</div>
+          <div class="fc-title">Styling & CSS</div>
+          <div class="fc-desc">Full CSS customization — make it look like anything.</div>
+        </div>
+        <div class="feature-card" onclick="goTo('multimedia')">
+          <div class="fc-icon">🎵</div>
+          <div class="fc-title">Multimedia</div>
+          <div class="fc-desc">Images, audio, video, transitions, and animations.</div>
+        </div>
+        <div class="feature-card" onclick="goTo('use_cases')">
+          <div class="fc-icon">🌍</div>
+          <div class="fc-title">Use Cases</div>
+          <div class="fc-desc">Games, education, surveys, portfolios, and more.</div>
+        </div>
+        <div class="feature-card" onclick="goTo('formats_comparison')">
+          <div class="fc-icon">⚙️</div>
+          <div class="fc-title">Story Formats</div>
+          <div class="fc-desc">Harlowe vs SugarCube vs Chapbook vs Snowman.</div>
+        </div>
+      </div>
+    `,
+    choices: [
+      { text: "Continue to Use Cases →", target: "use_cases" },
+    ]
+  },
+
+  // ── 11. Use Cases ──
+  "use_cases": {
+    chapter: "Chapter 5 · What Twine Is For",
+    title: "What Is Twine Used For?",
+    body: () => `
+      <p>Twine started as a tool for interactive fiction, but its community has found remarkable uses far beyond fantasy adventures:</p>
+
+      <p><strong>🎮 Games</strong> — Puzzle games, RPGs with stats and inventory, horror experiences, mystery games with branching investigations. The indie game community loves Twine for rapid prototyping.</p>
+
+      <p><strong>📚 Education</strong> — Scenario-based learning, ethical dilemma simulations, historical choose-your-own-path experiences, language learning dialogs. Teachers use Twine to make students active participants in lessons.</p>
+
+      <p><strong>🧠 Mental Health Tools</strong> — Guided journaling, cognitive behavioural therapy exercises, anxiety management scenarios. The interactivity creates a sense of agency that passive reading doesn't.</p>
+
+      <p><strong>📋 Surveys & Questionnaires</strong> — Branching surveys where later questions depend on earlier answers — like a paper form that fills itself out intelligently.</p>
+
+      <p><strong>🎭 Narrative Design Prototyping</strong> — Game studios use Twine to prototype dialogue trees and story systems before building them in Unity or Unreal.</p>
+
+      <p><strong>🌐 Interactive Portfolios & Résumés</strong> — Some designers present their work as a Twine story — "choose which kind of project you want to see."</p>
+
+      <div class="callout">
+        <span class="callout-label">🏆 Notable Works</span>
+        Twine has produced award-winning games like <em>Depression Quest</em>, <em>Howling Dogs</em>, and <em>With Those We Love Alive</em>. It's also been used in academic research and journalism.
+      </div>
+    `,
+    choices: [
+      { text: "Compare the different Twine story formats.", target: "formats_comparison" },
+      { text: "How do I actually get started with Twine?", target: "getting_started" },
+    ]
+  },
+
+  // ── 12. Formats ──
+  "formats_comparison": {
+    chapter: "Chapter 6 · Story Formats",
+    title: "Choosing Your Story Format",
+    body: () => `
+      <p>Twine supports multiple <strong>story formats</strong> — each is essentially a different engine that processes your passages differently. Choosing the right format shapes everything about how you write.</p>
+
+      <p><strong>🟣 Harlowe</strong> (this guide's format) — The default. Clean, English-like syntax. Great for beginners and narrative-first projects. Has some quirks for complex games but excels at interactive prose.</p>
+
+      <p><strong>🟤 SugarCube</strong> — The power user's choice. More JavaScript-like, has better support for save/load systems, audio, and complex game mechanics. A steeper learning curve but very well-documented.</p>
+
+      <p><strong>🟡 Chapbook</strong> — The newest format. YAML-inspired, very clean and minimal. Good for simpler branching stories with a modern feel. Less community support than Harlowe/SugarCube.</p>
+
+      <p><strong>⚪ Snowman</strong> — Bare-bones. Meant for developers comfortable with JavaScript and Underscore.js. Provides minimal scaffolding so you build almost everything yourself.</p>
+
+      <div class="callout tip">
+        <span class="callout-label">💡 Recommendation</span>
+        Start with <strong>Harlowe</strong> if you're a writer first. Move to <strong>SugarCube</strong> when you need save systems, audio management, or complex game mechanics.
+      </div>
+    `,
+    choices: [
+      { text: "How do I get started making my own Twine project?", target: "getting_started" },
+    ]
+  },
+
+  // ── 13. Getting Started ──
+  "getting_started": {
+    chapter: "Final Chapter · Begin",
+    title: "How to Get Started with Twine",
+    body: () => `
+      <p>Getting started with Twine takes about five minutes. Here's the path:</p>
+
+      <p><strong>1. Use the browser editor</strong> — Go to <a href="https://twinery.org/2" target="_blank" style="color:var(--accent)">twinery.org/2</a> and start immediately — no download required. Twine runs entirely in your browser and saves to local storage.</p>
+
+      <p><strong>2. Or download the desktop app</strong> — Available for Windows, macOS, and Linux at twinery.org. Saves projects as files on your computer.</p>
+
+      <p><strong>3. Create your first passage</strong> — Click "+ Story", give it a name, and you'll see a single passage called "Untitled Passage." Double-click it, write something, add a link with <code style="background:#eee;padding:1px 5px;border-radius:3px;font-family:monospace">[[Like This]]</code>, and a new passage will appear on the map.</p>
+
+      <p><strong>4. Play and publish</strong> — Hit "Play" to test your story in the browser. When ready, use "Publish to File" to export a single HTML file you can share with anyone.</p>
+
+      <div class="callout tip">
+        <span class="callout-label">📖 Resources</span>
+        The Harlowe manual is built into the editor (Help → Harlowe Manual). The Twine community at <strong>intfiction.org</strong> is active and welcoming.
+      </div>
+
+      <p style="margin-top:1.2em">And of course — Claude can help you write passages, design logic, debug macros, and build entire projects from scratch, just like this guide was built.</p>
+
+      <p style="text-align:center; margin-top:1.8em; font-family:'Space Mono',monospace; font-size:0.8rem; color:var(--accent)">✦ &nbsp; You've explored Twine. Now go make something. &nbsp; ✦</p>
+    `,
+    choices: [
+      { text: "← Back to the feature overview.", target: "feature_menu" },
+      { text: "Start over from the beginning.", target: "welcome" },
+    ]
+  },
+};
+
+// ── Total passages ────────────────────────────────────────────────────────────
+const TOTAL = Object.keys(passages).length;
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function goTo(id) {
+  const p = passages[id];
+  if (!p) return;
+  gs.visited.add(id);
+
+  // Chapter tag
+  document.getElementById('chapter-tag').textContent = p.chapter || '';
+
+  // Title
+  document.getElementById('passage-title').textContent = p.title;
+
+  // Body — re-render so demo state is fresh
+  document.getElementById('passage-body').innerHTML = p.body();
+
+  // Choices
+  const ca = document.getElementById('choices-area');
+  ca.innerHTML = '';
+  (p.choices || []).forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.text;
+    btn.addEventListener('click', () => goTo(c.target));
+    ca.appendChild(btn);
+  });
+
+  // Progress
+  const pct = Math.round((gs.visited.size / TOTAL) * 100);
+  document.getElementById('progress-bar-inner').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = gs.visited.size + ' / ' + TOTAL;
+
+  // Breadcrumb
+  const bc = document.getElementById('breadcrumb');
+  bc.innerHTML = 'You have visited <span>' + gs.visited.size + '</span> of ' + TOTAL + ' passages.';
+
+  // Scroll
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Demo functions ────────────────────────────────────────────────────────────
+function demoIncrement() {
+  gs.demoCounter++;
+  const el = document.getElementById('demo-counter');
+  const msg = document.getElementById('demo-counter-msg');
+  if (el) el.textContent = gs.demoCounter;
+  if (msg) msg.textContent = gs.demoCounter >= 5
+    ? '🎉 You clicked 5+ times! In Twine, this could unlock a secret passage.'
+    : 'Click 5 times to see something happen.';
+}
+
+function demoReset() {
+  gs.demoCounter = 0;
+  const el = document.getElementById('demo-counter');
+  const msg = document.getElementById('demo-counter-msg');
+  if (el) el.textContent = 0;
+  if (msg) msg.textContent = 'Click 5 times to see something happen.';
+}
+
+function getHPText() {
+  if (gs.demoHP > 15) return '✅ You feel strong and ready for anything.';
+  if (gs.demoHP > 8)  return '⚠️ You\'re hurt. Better find a healing potion.';
+  if (gs.demoHP > 0)  return '🩸 You\'re barely standing. One more hit and it\'s over.';
+  return '💀 You have fallen.';
+}
+
+function demoHurt() {
+  gs.demoHP = Math.max(0, gs.demoHP - 5);
+  const bar = document.getElementById('cond-hp-bar');
+  const val = document.getElementById('cond-hp-val');
+  const txt = document.getElementById('cond-status-text');
+  if (bar) bar.style.width = (gs.demoHP / 20 * 100) + '%';
+  if (val) val.textContent = gs.demoHP;
+  if (txt) txt.textContent = getHPText();
+}
+
+function demoHeal() {
+  gs.demoHP = Math.min(20, gs.demoHP + 5);
+  const bar = document.getElementById('cond-hp-bar');
+  const val = document.getElementById('cond-hp-val');
+  const txt = document.getElementById('cond-status-text');
+  if (bar) bar.style.width = (gs.demoHP / 20 * 100) + '%';
+  if (val) val.textContent = gs.demoHP;
+  if (txt) txt.textContent = getHPText();
+}
+
+function demoPickup(item, btnId) {
+  if (!gs.demoInventory.includes(item)) {
+    gs.demoInventory.push(item);
+    const disp = document.getElementById('demo-inv-display');
+    if (disp) disp.innerHTML = gs.demoInventory.map(i => `<span class="demo-inv-item">${i}</span>`).join('');
+    const btn = document.getElementById(btnId);
+    if (btn) { btn.textContent = '✓ Picked up'; btn.disabled = true; }
+  }
+}
+
+function demoReveal() {
+  gs.demoRevealed = true;
+  // Re-render just the body of the current passage
+  const p = passages["interactive_text"];
+  if (p) document.getElementById('passage-body').innerHTML = p.body();
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+goTo("welcome");
+</script>
+</body>
+</html>
