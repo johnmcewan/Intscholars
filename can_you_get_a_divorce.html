@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Can You Get a Divorce?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --cream:      #FDFBF5;
+    --parchment:  #F5EFD8;
+    --tan:        #E8D9B0;
+    --rust:       #C17F5A;
+    --rust-dark:  #8B4E2E;
+    --mauve:      #C4917A;
+    --mauve-dark: #9A6655;
+    --pink:       #E8B4A0;
+    --gold:       #C8952A;
+    --ink:        #2A1F14;
+    --ink-mid:    #5C4033;
+    --ink-dim:    #8B7355;
+    --end-orange: #D4722A;
+    --end-mauve:  #9A6655;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,150,100,0.08) 28px),
+      repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(180,150,100,0.04) 28px);
+    color: var(--ink);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 60px;
+  }
+
+  #header {
+    text-align: center;
+    padding: 40px 20px 0;
+    max-width: 680px;
+    width: 100%;
+  }
+
+  .icon { font-size: 2rem; margin-bottom: 8px; }
+
+  #header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+  }
+
+  #header .subtitle {
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1rem;
+    color: var(--ink-mid);
+    font-style: italic;
+    margin-bottom: 32px;
+  }
+
+  #card {
+    background: var(--cream);
+    border: 2px solid var(--tan);
+    border-radius: 2px;
+    max-width: 640px;
+    width: 100%;
+    padding: 36px 40px;
+    box-shadow: 4px 4px 0 var(--tan), 8px 8px 0 rgba(180,150,100,0.2);
+    animation: arrive 0.4s ease;
+    position: relative;
+  }
+
+  @keyframes arrive {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  #card::before, #card::after {
+    content: '❧';
+    position: absolute;
+    font-size: 1.1rem;
+    color: var(--tan);
+  }
+  #card::before { top: 10px; left: 14px; }
+  #card::after  { bottom: 10px; right: 14px; transform: rotate(180deg); }
+
+  .question {
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1.2rem;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  #choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .choice {
+    background: transparent;
+    border: 1.5px solid var(--mauve);
+    color: var(--rust-dark);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1.05rem;
+    padding: 12px 20px 12px 40px;
+    cursor: pointer;
+    border-radius: 1px;
+    text-align: left;
+    transition: all 0.18s ease;
+    position: relative;
+  }
+
+  .choice::before {
+    content: '→';
+    position: absolute;
+    left: 15px;
+    font-family: Georgia, serif;
+    color: var(--mauve);
+    transition: left 0.18s ease, color 0.18s ease;
+  }
+
+  .choice:hover {
+    background: var(--parchment);
+    border-color: var(--rust);
+    color: var(--rust-dark);
+  }
+
+  .choice:hover::before { left: 19px; color: var(--rust); }
+
+  .ending-orange {
+    background: var(--end-orange);
+    padding: 28px 32px;
+    text-align: center;
+    border-radius: 2px;
+  }
+
+  .ending-mauve {
+    background: var(--end-mauve);
+    padding: 28px 32px;
+    text-align: center;
+    border-radius: 2px;
+  }
+
+  .ending-orange h2, .ending-mauve h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .restart-btn {
+    margin-top: 20px;
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.7);
+    color: white;
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 0.95rem;
+    padding: 8px 20px;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: background 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .restart-btn:hover { background: rgba(255,255,255,0.15); }
+
+  #progress {
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    text-align: center;
+    margin-top: 20px;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  #footer {
+    margin-top: 32px;
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+    font-style: italic;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="icon">⚖️</div>
+  <h1>Can You Get<br>a Divorce?</h1>
+  <p class="subtitle">A helpful guide to mediaeval matrimonial law</p>
+</div>
+
+<div id="card">
+  <div class="question" id="question-text"></div>
+  <div id="choices"></div>
+</div>
+
+<div id="progress"></div>
+<div id="footer">A flowchart guide to mediaeval divorce proceedings</div>
+
+<script>
+const passages = {
+
+  // ── Entry point ─────────────────────────────────────────────────────────────
+  "start": {
+    text: "Are you guys blood relatives? (meaning you share a great-great-grandparent or more recent ancestor)",
+    choices: [
+      { label: "No — we are not related",       target: "faithful" },
+      { label: "Come to think of it, we are...", target: "did-you-know" },
+    ]
+  },
+
+  // ── Blood relatives branch ───────────────────────────────────────────────────
+  "did-you-know": {
+    text: "Did you know that when you got married?",
+    choices: [
+      { label: "Yes", target: "why-married" },
+      { label: "No — I hadn't a clue", target: "end-great-news" },
+    ]
+  },
+
+  "why-married": {
+    text: "What? Why did you get married then?",
+    choices: [
+      { label: "We were in love",  target: "dont-tell" },
+      { label: "I don't know",     target: "dont-tell" },
+    ]
+  },
+
+  "dont-tell": {
+    text: "Okay, maybe don't tell anyone you knew?",
+    choices: [
+      { label: "OK", target: "end-great-news" },
+    ]
+  },
+
+  // ── Faithfulness branch ──────────────────────────────────────────────────────
+  "faithful": {
+    text: "Have you both been faithful to each other?",
+    choices: [
+      { label: "Yes — completely faithful", target: "depends-gender" },
+      { label: "No",                        target: "who-cheated" },
+    ]
+  },
+
+  // ── Cheating branch ──────────────────────────────────────────────────────────
+  "who-cheated": {
+    text: "Did you cheat or your spouse?",
+    choices: [
+      { label: "'Twas I",    target: "face-repercussions" },
+      { label: "My spouse",  target: "end-great-news" },
+    ]
+  },
+
+  "face-repercussions": {
+    text: "Are you prepared to face legal repercussions for admitting this?",
+    choices: [
+      { label: "Sure, whatever, I just want a divorce", target: "end-great-news" },
+      { label: "Umm, what's the punishment?",            target: "hadnt-a-clue" },
+    ]
+  },
+
+  "hadnt-a-clue": {
+    text: "I hadn't a clue.",
+    choices: [
+      { label: "Continue →", target: "end-great-news" },
+    ]
+  },
+
+  // ── Both faithful → gender check ─────────────────────────────────────────────
+  "depends-gender": {
+    text: "Depends, what gender are you?",
+    choices: [
+      { label: "Female", target: "flogged" },
+      { label: "Male",   target: "probably-nothing" },
+    ]
+  },
+
+  "flogged": {
+    text: "Hmm... You might be flogged, stripped of your wealth, forced to become a nun, or possibly killed.",
+    choices: [
+      { label: "Yes — I accept that risk", target: "end-great-news" },
+      { label: "No thanks",                target: "consummated" },
+    ]
+  },
+
+  "probably-nothing": {
+    text: "Then probably nothing, actually!",
+    choices: [
+      { label: "Great!",                   target: "end-great-news" },
+      { label: "Still better than my marriage", target: "try-not-worry" },
+    ]
+  },
+
+  "try-not-worry": {
+    text: "Try not to worry about that.",
+    choices: [
+      { label: "Wait, isn't that kind of unfair?", target: "wait-unfair" },
+      { label: "OK",                               target: "end-great-news" },
+    ]
+  },
+
+  "wait-unfair": {
+    text: "Wait, isn't that kind of unfair?",
+    choices: [
+      { label: "OK", target: "end-great-news" },
+    ]
+  },
+
+  // ── Consummation branch ──────────────────────────────────────────────────────
+  "consummated": {
+    text: "Not to get too personal, but have you... consummated the marriage?",
+    choices: [
+      { label: "Yes", target: "impotent" },
+      { label: "No",  target: "end-great-news" },
+    ]
+  },
+
+  "impotent": {
+    text: "Is this because you or your partner is impotent?",
+    choices: [
+      { label: "Yes — that is the reason", target: "what-kind-trial" },
+      { label: "No",                       target: "end-no-divorce" },
+    ]
+  },
+
+  // ── Trial branch ─────────────────────────────────────────────────────────────
+  "what-kind-trial": {
+    text: "What kind of trial?",
+    choices: [
+      { label: "It's pretty simple: judges will observe you guys in your bedroom and decide whether your claim is true", target: "bribe-all-time" },
+      { label: "I bribe them all the time",  target: "end-great-news" },
+    ]
+  },
+
+  "bribe-all-time": {
+    text: "Would you be willing to undergo a trial to prove this?",
+    choices: [
+      { label: "Yes — I'll prove it in court", target: "prove-court" },
+      { label: "No",                           target: "not-looking-good" },
+    ]
+  },
+
+  "prove-court": {
+    text: "Could you prove it in court?",
+    choices: [
+      { label: "The evidence is all there!", target: "good-idea" },
+      { label: "No",                         target: "not-looking-good" },
+    ]
+  },
+
+  "good-idea": {
+    text: "Good idea.",
+    choices: [
+      { label: "Continue →", target: "end-great-news" },
+    ]
+  },
+
+  "not-looking-good": {
+    text: "It's not looking good. Do you think any of your local divorce court judges would be open to a bribe?",
+    choices: [
+      { label: "Yes — I bribe them all the time", target: "end-great-news" },
+      { label: "No",                              target: "end-no-divorce" },
+    ]
+  },
+
+  // ── Major crime branch ───────────────────────────────────────────────────────
+  "major-crime": {
+    text: "Do you suspect that your partner has committed some sort of major crime? Maybe heresy, witchcraft, murder, incest or something like that?",
+    choices: [
+      { label: "Yes — absolutely",                               target: "make-something-up" },
+      { label: "No, everything works fine we just hate each other", target: "end-no-divorce" },
+    ]
+  },
+
+  "make-something-up": {
+    text: "Maybe you could just make something up?",
+    choices: [
+      { label: "Can't be any worse than my marriage", target: "end-great-news" },
+      { label: "No — I'm no liar",                    target: "end-no-divorce" },
+    ]
+  },
+
+  // ── Endings ───────────────────────────────────────────────────────────────────
+  "end-great-news": {
+    text: "Great news!\nYou can get a divorce!",
+    ending: "orange",
+    choices: []
+  },
+
+  "end-no-divorce": {
+    text: "Sorry,\nno divorce\nfor you!",
+    ending: "mauve",
+    choices: []
+  },
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let current = "start";
+let steps   = 0;
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function goTo(id) {
+  const p = passages[id];
+  if (!p) return;
+  current = id;
+  steps++;
+
+  const card = document.getElementById('card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'arrive 0.35s ease';
+
+  const prEl = document.getElementById('progress');
+
+  if (p.ending) {
+    card.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = p.ending === 'orange' ? 'ending-orange' : 'ending-mauve';
+    div.innerHTML = `<h2>${p.text.replace(/\n/g, '<br>')}</h2>`;
+    const btn = document.createElement('button');
+    btn.className = 'restart-btn';
+    btn.textContent = '← Begin again';
+    btn.addEventListener('click', () => {
+      card.innerHTML = `<div class="question" id="question-text"></div><div id="choices"></div>`;
+      steps = 0;
+      goTo('start');
+    });
+    div.appendChild(btn);
+    card.appendChild(div);
+    prEl.textContent = `${steps} decision${steps !== 1 ? 's' : ''} made`;
+  } else {
+    if (!document.getElementById('question-text')) {
+      card.innerHTML = `<div class="question" id="question-text"></div><div id="choices"></div>`;
+    }
+    document.getElementById('question-text').textContent = p.text;
+    const choicesEl = document.getElementById('choices');
+    choicesEl.innerHTML = '';
+    p.choices.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.textContent = c.label;
+      btn.addEventListener('click', () => goTo(c.target));
+      choicesEl.appendChild(btn);
+    });
+    prEl.textContent = steps <= 1 ? '' : `${steps} decision${steps !== 1 ? 's' : ''} made`;
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+steps = 0;
+goTo('start');
+</script>
+</body>
+</html>
